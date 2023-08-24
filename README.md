@@ -296,6 +296,7 @@ eksctl create cluster --name virtualonebox-cluster \
 ### Kubernetes Cluster Status
 * Running kubectl get nodes displays the nodes in your cluster.
 * This confirms that your Kubernetes cluster is ready.
+![](images/eksctl%20cluster%20created.JPG)
 ## Creating Deployment Manifest File
 * Generate the deployment manifest file: nano regapp-deployment.yml
 * Add the following content to the file:
@@ -348,3 +349,95 @@ spec:
   type: LoadBalancer
 ```
 * Save the file.
+
+# Step 8.Integrating Bootstrap Server with Ansible
+## Enabling Password Authentication on Bootstrap Server
+### Edit SSH Configuration
+
+* Access the Bootstrap Server terminal.
+* Open the SSH configuration: sudo nano /etc/ssh/sshd_config
+* Change PasswordAuthentication to yes and save.
+### Set Root Password
+
+* Set a password for the root user: passwd root
+* Enter the desired password (e.g., P@ss12345).
+### Reload SSH Service
+
+* Reload the SSH service for changes to take effect.
+## Integrating Bootstrap Server with Ansible
+### Ansible Hosts Configuration
+
+* On the Ansible Server, open the hosts file: sudo nano /etc/ansible/hosts
+* Add a group named kubernetes with the Bootstrap Server's private IP.
+### Copy SSH Key
+
+* Copy the SSH key from Ansible Server to Bootstrap Server:
+```bash
+su ansadmin
+sudo su
+cd ~
+ssh-copy-id root@172.31.42.192
+```
+### Verify SSH Connection
+
+* Test SSH connection to the Bootstrap Server: ssh root@172.31.42.192
+### Create Ansible Playbook for Deployment
+
+* Rename the existing playbook: mv regapp.yml create_image_regapp.yml
+* Create a new playbook named kube_deploy.yml and add the necessary tasks.
+```bash
+---
+- hosts: kubernetes
+  user: root
+  tasks:
+    - name: deploy regapp on kubernetes
+      command: kubectl apply -f regapp-deployment.yml
+    - name: create service for regapp
+      command: kubectl apply -f regapp-service.yml
+    - name: update deployment with new pods if image updated
+      command: kubectl rollout restart deployment.apps/virtualonebox-regapp
+```
+## Verifying Kubernetes Deployment
+After successfully setting up your Kubernetes cluster and deploying your application using Ansible and Jenkins, you can verify the deployment by interacting with Kubernetes resources.
+
+## Checking Pods and Service
+Open a terminal and log in to the Bootstrap Server.
+Use the command kubectl get all to see a list of resources in your Kubernetes cluster.
+You will notice two pods running and a LoadBalancer service in the output.
+## Accessing the Application
+Locate the DNS name of the LoadBalancer service.
+Copy the DNS name.
+Open a web browser and paste the DNS name along with port 8080 (e.g., http://dnsname.us-east-1.elb.amazonaws.com:8080).
+You should see the home page of the Apache server running in your Kubernetes pods.
+
+![](images/app.JPG)
+
+## Jenkins Deployment Job for Kubernetes
+### Create Jenkins Deployment Job
+
+* Access the Jenkins dashboard, create a new Freestyle Project named RegApp_CD_Job.
+### Configure Post-Build Action
+
+* Configure post-build actions by sending build artifacts over SSH.
+* Use SSH Server name Ansible-Server and the command to run the playbook: ansible-playbook /opt/Docker/kube_deploy.yml
+### Update CI Job
+
+* In the RegApp_CI_Job configuration, set up the trigger to "Poll SCM" with a schedule like ***** (for continuous polling).
+### Set Up Build Triggers
+
+* In "Post-Build Actions," choose "Build other project" and select RegApp_CD_Job.
+## Verify CI/CD by Making a Test Commit
+### Make a Test Commit
+![](images/jenkins.JPG)
+* Make a test commit on the GitHub repository by editing the Readme.md file:
+```bash
+git add .
+git commit -m "Changed README File"
+git push origin main
+```
+### Check GitHub Repository
+
+* Refresh the GitHub repository to see the changes.
+
+## Conclusion
+This guide illustrates the integration of the Bootstrap Server with Ansible and Jenkins to achieve CI/CD for Kubernetes deployments. By following these steps, you can seamlessly manage deployments and test the pipeline's functionality.
