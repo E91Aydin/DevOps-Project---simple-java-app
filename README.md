@@ -104,3 +104,59 @@ sudo yum install git
 * Monitor the build progress and check the console output.
 * Once the build is successful, navigate to "Dashboard" > "Test-Maven-Build" > "Workspace."
 * Inside the workspace, explore the path: Webapp/target/ to find the webapp.war build artifact.
+
+# Step 4.Ansible Server Setup and Ansible Installation and Integrate with Jenkins
+This guide outlines the process of setting up an Ansible server and installing Ansible for streamlined infrastructure management. It also covers integrating Ansible with Jenkins to automate tasks and deployments.
+## Server Setup and User Configuration
+### Launch AWS Linux Instance
+
+* Launch an AWS Linux instance named "ANSIBLE-SERVER."
+* Change the hostname by editing /etc/hostname and replacing it with "ansible-server."
+* Reboot the server using init 6.
+### Create New User and Grant Sudo Access
+
+* Create a new user: ansadmin.
+* Set a password for the user: passwd ansadmin.
+* Grant sudo privileges to the user by editing the sudoers file: visudo.
+### Enable Password Authentication
+
+* Modify SSH configuration: vi /etc/ssh/sshd_config.
+* Set PasswordAuthentication to yes.
+* Reload SSH service: service sshd reload.
+### Generate SSH Key for ansadmin User
+
+* Switch to the ansadmin user.
+* Generate an SSH key pair using ssh-keygen.
+* Navigate to the .ssh directory and find the public key (id_rsa.pub).
+
+## Ansible Installation
+### Install Ansible
+* Log in as ansadmin and switch to the root user.
+* Install Ansible using Amazon Linux extras: amazon-linux-extras install ansible2.
+* Verify Ansible installation: ansible --version.
+
+## Integrating Ansible with Jenkins
+### Configure Jenkins
+
+* In the Jenkins dashboard, navigate to "Manage Jenkins" > "System."
+* Under "Publish over SSH," add a new SSH server configuration:
+    * Name: Ansible-Server
+    * Password: P@ss12345
+    * Hostname: [IP of your Ansible server on AWS]
+## Create Docker Directory on Ansible Server
+
+* Connect to the Ansible server.
+* Create a directory for Docker: sudo mkdir /opt/Docker.
+* Assign ownership to ansadmin: sudo chown ansadmin:ansadmin /opt/Docker.
+## Set Up Jenkins Job for Copying Artifacts
+
+* Create a new Jenkins job: "Copy_Artifacts_onto_Ansible."
+* Choose "Maven Project" and configure Git repository.
+* In post-build steps, use "Send build artifacts over SSH":
+    * Choose the Ansible server configured earlier.
+    * Source files: webapp/target/*.war
+    * Remote directory: /opt/Docker
+## Run Jenkins Job
+
+* Trigger the job by clicking "Build Now."
+* Verify on the Ansible server that the artifact (webapp.war) is copied to the Docker directory.
