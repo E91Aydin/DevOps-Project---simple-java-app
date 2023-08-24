@@ -218,7 +218,7 @@ COPY ./*.war /usr/local/tomcat/webapps
 
 * Verify the images using: docker images
 * You'll see the tomcat image pulled from Docker Hub and your custom regapp image created with the playbook.
-
+![](images/docker.JPG)
 # Step 6.Updating Jenkins Job to Use the Ansible Playbook
 This section explains how to update your Jenkins job to execute an Ansible playbook. It guides you through configuring Jenkins to trigger Ansible automation for your deployments.
 ## Updating Jenkins Job
