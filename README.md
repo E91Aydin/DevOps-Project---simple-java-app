@@ -160,3 +160,61 @@ This guide outlines the process of setting up an Ansible server and installing A
 
 * Trigger the job by clicking "Build Now."
 * Verify on the Ansible server that the artifact (webapp.war) is copied to the Docker directory.
+
+# Step 5.Installing and Configuring Docker on Ansible Server
+ Docker allows you to run, build, and manage applications in containers, making deployment and management efficient and consistent.
+## Docker Installation and Configuration
+### Install Docker
+
+* On your Ansible Server, execute: sudo yum install docker
+* Ensure the ansadmin user is part of the Docker group:
+```bash
+sudo usermod -aG docker ansadmin
+```
+* To ensure proper permissions, start the Docker service: sudo service docker start
+* Reboot the server to apply changes.
+### Creating a Dockerfile
+
+* Log in as ansadmin and ensure Docker is running: sudo systemctl start docker
+* Navigate to the Docker directory: cd /opt/Docker/
+* Create a Dockerfile: nano Dockerfile
+* Add the following lines to the Dockerfile:
+```bash
+FROM tomcat:latest
+RUN cp -R /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+COPY ./*.war /usr/local/tomcat/webapps
+```
+* Save and exit.
+### Creating Ansible Playbook for Docker Image
+
+* In your Ansible Server's /etc/ansible/hosts file, specify the IP address of the server.
+```bash
+[ansible]
+172.31.26.249
+```
+* Copy your SSH key to the localhost: ssh-copy-id 172.31.26.249
+* Create a playbook: nano regapp.yml
+* Add the following content:
+```YAML
+---
+- hosts: ansible
+  tasks:
+  - name: create docker image
+    command: docker build -t regapp:latest .
+    args:
+     chdir: /opt/Docker
+  - name: create tag to push image onto Docker Hub
+    command: docker tag regapp:latest devops810/regapp:latest
+  - name: push Docker image to Docker Hub
+    command: docker push devops810/regapp:latest
+```
+* Save and exit.
+## Running the Ansible Playbook
+
+    * Before running the playbook, log in to Docker Hub: docker login
+    * Check the playbook's syntax: ansible-playbook regapp.yml --check
+    * If syntax is okay, execute the playbook: ansible-playbook regapp.yml
+## Verifying Docker Images
+
+* Verify the images using: docker images
+* You'll see the tomcat image pulled from Docker Hub and your custom regapp image created with the playbook.
