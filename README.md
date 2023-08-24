@@ -65,3 +65,42 @@ Confirm that Maven and Java paths have been added to the PATH and check the inst
 echo $PATH
 mvn -version
 ```
+# Installing Maven Plugin and Configuring Jenkins for Maven
+## 1.Install Maven Plugin and Configure JDK
+* Access Jenkins by navigating to http://<your-JENKINS-server-IP>:8080 and log in.
+* Go to "Manage Jenkins" > "Manage Plugins" > "Available" tab.
+* Search for the "Maven Integration" plugin and install it without restarting Jenkins.
+* Next, navigate to "Manage Jenkins" > "Global Tool Configuration" > "JDK."
+* Add a new JDK configuration:
+    * Name: java11
+    * JAVA_HOME: /usr/lib/jvm/java-11-openjdk-11.0.19.0.7-1.amzn2.0.1.x86_64
+(Add the correct path from your JENKINS_SERVER)
+    * Ignore any error messages and save the configuration.
+* Similarly, add Maven to the tools:
+    * Name: Maven
+    * MAVEN_HOME: /opt/maven
+    * Uncheck "Install automatically" since you've already installed Maven.
+    * Save your changes.
+## 2.Install and Configure GitHub Plugin and Git on Jenkins Server
+* Go to "Manage Jenkins" > "Manage Plugins" > "Installed" tab.
+* Search for "GitHub" and disable "GitHub Branch Source Plugin" while enabling "GitHub Plugin."
+* Restart Jenkins to apply the changes.
+On your JENKINS_SERVER, install Git using the command:
+```bash
+sudo yum install git
+```
+## 3.Create and Test a Maven Build Project
+* Return to the Jenkins dashboard.
+* Click "New Item" to create a new project:
+    * Name: Test-Maven-Build
+    * Choose "Maven Project" and click "OK."
+* In the project settings:
+     * -Add a description: "Test Maven Build."
+     * Under "Source Code Management," choose "Git" and add your Git repository's URL.
+    * In "Goals and options," enter: clean install.
+    * Apply the settings and save the project.
+## 4.Initiate and Monitor the Build
+* Click "Build Now" to initiate the build process.
+* Monitor the build progress and check the console output.
+* Once the build is successful, navigate to "Dashboard" > "Test-Maven-Build" > "Workspace."
+* Inside the workspace, explore the path: Webapp/target/ to find the webapp.war build artifact.
