@@ -26,3 +26,42 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 Copy the password and paste it into the prompt on the Jenkins page.
 ### 5.Customizing Jenkins and User Registration
 Once the password is entered correctly, you will have the opportunity to customize your Jenkins setup according to your preferences.Following customization, you'll need to register as a user. This step is essential for utilizing Jenkins for your DevOps projects.
+
+# Step 2.Installing and Configuring Apache Maven
+## Introduction
+This guide outlines the steps to install and configure Apache Maven on your Linux instance (Jenkins-server). Maven is an essential tool for building and managing Java projects. Follow these instructions to set it up correctly.
+### 1.Download Maven Binary Archive and connect to Linux instance
+Visit the Apache Maven download page and copy the link to the binary tar.gz archive for Linux. In this example, we'll use version 3.9.4: apache-maven-3.9.4-bin.tar.gz.SSH into your Linux instance (Jenkins-server) as the root user.
+### 2.Download and Extract Maven and Move Maven Folder
+Download the Maven archive:
+```bash
+wget https://dlcdn.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.tar.gz
+```
+Extract the archive:
+```bash
+tar -xzvf apache-maven-3.9.4-bin.tar.gz
+```
+After extracting, a folder named apache-maven-3.9.4 (or similar) will be created. Rename it to simply maven and move it:
+```bash
+mv apache-maven-3.9.4 maven
+```
+### 3.Set Environment Variables and Verify Installation
+To run Maven from anywhere on the server, configure the environment variables. Navigate to the root home directory and open the .bash_profile file using a text editor:
+```bash
+cd ~
+vim .bash_profile
+```
+Add the following lines at the end of the file (make sure to replace the Java path with the correct.Save the file and execute.
+```bash
+M2_HOME=/opt/maven
+M2=/opt/maven/bin
+JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.19.0.7-1.amzn2.0.1.x86_64
+PATH=$PATH:$HOME/bin:$JAVA_HOME:$M2_HOME:$M2
+
+source .bash_profile
+```
+Confirm that Maven and Java paths have been added to the PATH and check the installed Maven version.
+```bash
+echo $PATH
+mvn -version
+```
