@@ -65,7 +65,7 @@ Confirm that Maven and Java paths have been added to the PATH and check the inst
 echo $PATH
 mvn -version
 ```
-# Installing Maven Plugin and Configuring Jenkins for Maven
+# Step 3.Installing Maven Plugin and Configuring Jenkins for Maven
 ## 1.Install Maven Plugin and Configure JDK
 * Access Jenkins by navigating to http://<your-JENKINS-server-IP>:8080 and log in.
 * Go to "Manage Jenkins" > "Manage Plugins" > "Available" tab.
