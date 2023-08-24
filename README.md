@@ -218,3 +218,61 @@ COPY ./*.war /usr/local/tomcat/webapps
 
 * Verify the images using: docker images
 * You'll see the tomcat image pulled from Docker Hub and your custom regapp image created with the playbook.
+
+# Step 6.Updating Jenkins Job to Use the Ansible Playbook
+This section explains how to update your Jenkins job to execute an Ansible playbook. It guides you through configuring Jenkins to trigger Ansible automation for your deployments.
+## Updating Jenkins Job
+### Access Jenkins Dashboard
+
+* Go to your Jenkins dashboard.
+* Choose the project "Copy_Artifacts_onto_Ansible" (Maven project) and click "Configure."
+### Configuring Post-build Action
+
+* Scroll down to "Post-build Actions."
+* Under "Send build artifacts over SSH," in the "Transfers" section, find "Exec command."
+* Add the command to run the Ansible playbook:
+```bash
+ansible-playbook /opt/Docker/regapp.yml
+```
+* Click "Apply" and "Save."
+# Setting Up Bootstrap Server for eksctl
+This section explains how to set up a Bootstrap Server for eksctl (Amazon EKS command-line tool). It covers installing required tools, such as kubectl and eksctl, as well as creating and attaching an IAM role to the EC2 instance.
+
+## Installing kubectl and eksctl
+### Access the Bootstrap Server
+
+* Launch an AWS instance named "EKS_Bootstrap_Server."
+* Connect to the instance via SSH using the key.pem file.
+### Change Hostname and Reboot
+
+* Log in as the root user.
+* Change the hostname: sudo vi /etc/hostname (set to "EKS_Bootstrap_Server").
+* Reboot the server to apply the changes: sudo init 6.
+### Install kubectl
+
+* Become the root user: sudo su
+* Download kubectl: curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.27.1/2023-04-19/bin/linux/amd64/kubectl
+* Provide executable permission: chmod +x ./kubectl
+* Move kubectl to /usr/local/bin: mv kubectl /usr/local/bin
+### Check kubectl Version
+
+* Verify the installed version: kubectl version --output=yaml
+### Install eksctl
+
+* Download eksctl: curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+* Move eksctl to /usr/local/bin: mv /tmp/eksctl /usr/local/bin
+## Create and Attach IAM Role to EC2 Instance
+### Create IAM Role
+
+* In the AWS Console, navigate to IAM > Roles > Create Role.
+* Choose the trusted entity as AWS service, select EC2, and proceed.
+* Attach necessary policies (e.g., AmazonEC2FullAccess, AWSCloudFormationFullAccess, IAMFullAccess).
+### Assign Permissions
+
+* Select additional custom policies as needed.
+* For this guide, also attach the AdministratorAccess policy (note: this is not recommended in production).
+* Name the role (e.g., eksctl_role) and create it.
+### Attach Role to EC2 Instance
+
+* Go to the EC2 instance's Actions > Security > Modify IAM role.
+* Select the newly created role (e.g., eksctl_role) and update the IAM role.
