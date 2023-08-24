@@ -276,3 +276,75 @@ This section explains how to set up a Bootstrap Server for eksctl (Amazon EKS co
 
 * Go to the EC2 instance's Actions > Security > Modify IAM role.
 * Select the newly created role (e.g., eksctl_role) and update the IAM role.
+
+# Step 7.Setting Up Kubernetes using eksctl
+This section explains the process of setting up Kubernetes using eksctl. It guides you through creating a Kubernetes cluster and deploying applications within it.
+## Creating a Kubernetes Cluster
+### Access the EKS_Bootstrap_Server Terminal
+* Log in to the EKS_Bootstrap_Server terminal.
+* Ensure you're in the root directory.
+### Create Kubernetes Cluster
+* Use the command to create a Kubernetes cluster:
+```bash
+eksctl create cluster --name virtualonebox-cluster \
+>  --region us-east-1 \
+>  --node-type t2.micro \
+>  enter
+```
+* Cluster creation may take around 20 to 25 minutes.
+* Confirm cluster creation by running: kubectl get nodes
+### Kubernetes Cluster Status
+* Running kubectl get nodes displays the nodes in your cluster.
+* This confirms that your Kubernetes cluster is ready.
+## Creating Deployment Manifest File
+* Generate the deployment manifest file: nano regapp-deployment.yml
+* Add the following content to the file:
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virtualonebox-regapp
+  labels:
+    app: regapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: regapp
+  template:
+    metadata:
+      labels:
+        app: regapp
+    spec:
+      containers:
+      - name: regapp
+        image: devops810/regapp
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+```
+* Save the file.
+## Create Service Manifest File
+* Create the service manifest file: nano regapp-service.yml
+* Add the following content to the file:
+```bash
+apiVersion: v1
+kind: Service
+metadata:
+  name: virtualonebox-service
+  labels:
+    app: regapp
+spec:
+  selector:
+    app: regapp
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: LoadBalancer
+```
+* Save the file.
